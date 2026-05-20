@@ -11,9 +11,10 @@ import { registerBootstrapHandlers } from './handlers/bootstraps'
 import logger from 'electron-log/main'
 import { registerProfilesHandlers } from './handlers/profiles'
 import { registerSkinHandlers } from './handlers/skin'
+import { registerInstallHandlers } from './handlers/install'
 
-const APP_TITLE = 'EML Template'
-const BG_COLOR = '#121212'
+const APP_TITLE = 'Spacak Launcher'
+const BG_COLOR = '#030803'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -67,8 +68,8 @@ function configureAppMenu() {
     applicationName: APP_TITLE,
     applicationVersion: app.getVersion(),
     version: 'Build 2026.1',
-    copyright: 'Copyright © 2026 EML',
-    credits: 'Developed with EML Lib & Electron',
+    copyright: 'Copyright © 2026 Spacak',
+    credits: 'Developed with Electron',
     iconPath: path.join(__dirname, '../build/icon.png')
   })
 
@@ -120,6 +121,7 @@ app.whenReady().then(() => {
   if (mainWindow) {
     registerAuthHandlers(mainWindow)
     registerProfilesHandlers()
+    registerInstallHandlers(mainWindow)
     registerServerHandlers()
     registerSkinHandlers()
     registerNewsHandlers()

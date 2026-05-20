@@ -1,8 +1,8 @@
 {
-  "name": "eml-template",
-  "productName": "EML Template",
-  "author": "GoldFrite",
-  "description": "Template launcher with EML Lib",
+  "name": "spacak-launcher",
+  "productName": "Spacak Launcher",
+  "author": "Arduinak",
+  "description": "Spacak Launcher",
   "private": true,
   "version": "1.2.0",
   "license": "MIT",
@@ -12,16 +12,23 @@
     "build": "tsc && vite build",
     "release:win": "npm run build && electron-builder --win",
     "release:mac": "npm run build && electron-builder --mac",
-    "release:lin": "npm run build && electron-builder --linux"
+    "release:lin": "npm run build && electron-builder --linux",
+    "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1"
   },
   "build": {
-    "appId": "com.eml.template",
-    "productName": "EML Template",
-    "copyright": "Copyright © 2026 EML",
+    "appId": "com.spacak.launcher",
+    "productName": "Spacak Launcher",
+    "copyright": "Copyright © 2026 Spacak",
     "directories": {
       "output": "release",
       "buildResources": "build"
     },
+    "extraFiles": [
+      {
+        "from": "Profiles",
+        "to": "Profiles"
+      }
+    ],
     "files": [
       "dist",
       "dist-electron",
@@ -39,13 +46,14 @@
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
     "publish": {
-      "provider": "generic",
-      "url": "https://emlproject.pages.dev/"
+      "provider": "github",
+      "owner": "Arduinak",
+      "repo": "SpacakSMP-launcher"
     },
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico",
-      "legalTrademarks": "EML Project"
+      "legalTrademarks": "Spacak"
     },
     "nsis": {
       "oneClick": false,
@@ -53,10 +61,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "EML Template",
+      "shortcutName": "Spacak Launcher",
       "deleteAppDataOnUninstall": true,
       "artifactName": "${productName}-Setup-${version}.${ext}",
-      "uninstallDisplayName": "EML Template"
+      "uninstallDisplayName": "Spacak Launcher"
     },
     "mac": {
       "target": [
@@ -102,7 +110,7 @@
       ],
       "icon": "build/icon.png",
       "category": "Game",
-      "description": "Template launcher with EML Lib",
+      "description": "Spacak Launcher",
       "artifactName": "${productName}-${version}.${ext}"
     }
   },
@@ -112,6 +120,7 @@
     "electron-updater": "^6.8.3",
     "eml-lib": "^2.3.5",
     "marked": "^18.0.3",
+    "minecraft-launcher-core": "^3.18.2",
     "skinview3d": "^3.4.1"
   },
   "devDependencies": {

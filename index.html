@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EML Template</title>
+    <title>Spacak Launcher</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
     <style>
       body {
-        background-color: #121212;
+        background-color: #030803;
         overflow: hidden;
       }
 
@@ -38,8 +38,11 @@
         align-items: center;
         height: 100vh;
         width: 100vw;
-        background-color: #121212;
+        background-color: #030803;
+        background-image: radial-gradient(ellipse 70% 60% at 30% 50%, rgba(34, 197, 94, 0.07) 0%, transparent 70%);
         transition: opacity 0.4s ease-in-out;
+        font-family: 'Poppins', sans-serif;
+        color: #f0fdf4;
       }
 
       div.loading {
@@ -101,16 +104,34 @@
       <div id="view-login" class="view" data-view="login">
         <div class="login-card">
           <img src="/src/static/images/logo.png" class="logo" alt="Logo" />
-          <h1>Welcome</h1>
-          <p class="subtitle">Log in to verify your access.</p>
+          <h1>Vitaj</h1>
+          <p class="subtitle">Prihlás sa alebo hraj offline.</p>
 
           <button id="btn-login-ms" class="btn btn-microsoft">
             <i class="fa-brands fa-microsoft"></i>
-            <span>Sign in with Microsoft</span>
+            <span>Prihlásiť cez Microsoft</span>
           </button>
 
+          <div class="login-divider"><span>alebo</span></div>
+
+          <div class="offline-section">
+            <input
+              type="text"
+              id="offline-username"
+              class="offline-input"
+              placeholder="Tvoja prezývka..."
+              maxlength="16"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="btn-login-offline" class="btn btn-offline" disabled>
+              <i class="fa-solid fa-user-slash"></i>
+              <span>Hrať offline</span>
+            </button>
+          </div>
+
           <div class="login-footer">
-            <small>No account yet? <a href="https://microsoft.com">Create one here</a></small>
+            <small>Offline hráči sa môžu pripojiť iba na cracked servery.</small>
           </div>
         </div>
       </div>
@@ -130,38 +151,27 @@
           </div>
 
           <div class="sidebar-middle">
-            <h3 class="shop-header">
-              <span>Shop</span>
-              <span class="shop-link">
-                <a href="https://emlproject.pages.dev" target="_blank"><i class="fa-fw fa-solid fa-cart-shopping"></i> Visit shop...</a>
+            <div class="profile-panel-header">
+              <span id="panel-profile-name">Profile 1</span>
+              <span class="fabric-badge" id="panel-loader-badge">
+                <i class="fa-solid fa-cube"></i> Fabric 1.20.1
               </span>
-            </h3>
-            <div class="shop-item">
-              <img src="src/static/images/gold.png" class="shop-item-image" alt="Gold Rank" />
-              <div class="shop-item-details">
-                <span class="item-name">Gold Rank</span>
-                <span class="item-price">$9.99</span>
-              </div>
             </div>
-            <div class="shop-item">
-              <img src="src/static/images/silver.png" class="shop-item-image" alt="Silver Rank" />
-              <div class="shop-item-details">
-                <span class="item-name">Silver Rank</span>
-                <span class="item-price">$6.99</span>
+
+            <div class="profile-stats-grid">
+              <div class="stat-card">
+                <i class="fa-fw fa-solid fa-puzzle-piece"></i>
+                <div>
+                  <span id="panel-mods-count" class="stat-value">—</span>
+                  <span class="stat-label">Mods</span>
+                </div>
               </div>
-            </div>
-            <div class="shop-item">
-              <img src="src/static/images/bronze.png" class="shop-item-image" alt="Bronze Rank" />
-              <div class="shop-item-details">
-                <span class="item-name">Bronze Rank</span>
-                <span class="item-price">$3.99</span>
-              </div>
-            </div>
-            <div class="shop-item">
-              <img src="src/static/images/box.png" class="shop-item-image" alt="Mystery Box" />
-              <div class="shop-item-details">
-                <span class="item-name">Mystery Box</span>
-                <span class="item-price">$5.99</span>
+              <div class="stat-card">
+                <i class="fa-fw fa-solid fa-earth-americas"></i>
+                <div>
+                  <span id="panel-saves-count" class="stat-value">—</span>
+                  <span class="stat-label">Worlds</span>
+                </div>
               </div>
             </div>
           </div>
@@ -203,9 +213,9 @@
           <div class="news-header">
             <h2>News feed</h2>
             <div class="social-links">
-              <a href="https://emlproject.com/discord/other" target="_blank" class="btn btn-icon-only"><i class="fa-brands fa-discord"></i></a>
-              <a href="https://x.com/EMLProject" target="_blank" class="btn btn-icon-only"><i class="fa-brands fa-x-twitter"></i></a>
-              <a href="https://emlproject.com" target="_blank" class="btn btn-icon-only"><i class="fa-solid fa-globe"></i></a>
+              <a href="#" target="_blank" class="btn btn-icon-only"><i class="fa-brands fa-discord"></i></a>
+              <a href="#" target="_blank" class="btn btn-icon-only"><i class="fa-brands fa-x-twitter"></i></a>
+              <a href="#" target="_blank" class="btn btn-icon-only"><i class="fa-solid fa-globe"></i></a>
             </div>
           </div>
 

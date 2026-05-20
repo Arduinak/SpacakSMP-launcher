@@ -28,7 +28,7 @@ export async function initSettings() {
   initFormValues(sysInfo.resolution)
 
   const versionElem = document.getElementById('version')
-  if (versionElem) versionElem.innerText = `EML Template v${sysInfo.version}`
+  if (versionElem) versionElem.innerText = `Spacak Launcher v${sysInfo.version}`
 }
 
 function initUIListeners() {

@@ -12,6 +12,8 @@ dist
 dist-electron
 dist-ssr
 release
+final
+Profiles
 *.local
 
 .vscode/*

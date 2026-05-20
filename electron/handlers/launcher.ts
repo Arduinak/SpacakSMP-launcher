@@ -1,156 +1,221 @@
 import { ipcMain, BrowserWindow, app } from 'electron'
-import { Launcher } from 'eml-lib'
-import type { Account, IProfile } from 'eml-lib'
+import { Client } from 'minecraft-launcher-core'
+import type { Account } from 'eml-lib'
 import type { IGameSettings } from './settings'
 import logger from 'electron-log/main'
-import { ADMINTOOL_URL } from '../const'
+import fs from 'node:fs'
+import path from 'node:path'
+import https from 'node:https'
+import http from 'node:http'
+import { getProfileDir } from './install'
 
-export function registerLauncherHandlers(mainWindow: BrowserWindow) {
-  ipcMain.handle('game:launch', (_event, payload: { account: Account; settings: IGameSettings; profileSlug: string }) => {
-    const { account, settings, profileSlug } = payload
-    const java = settings.java === 'system' ? { install: 'manual' as const, absolutePath: 'java' } : { install: 'auto' as const }
-    logger.log('Launching')
+// ── helpers ───────────────────────────────────────────────────────────────────
 
-    const launcher = new Launcher({
-      url: ADMINTOOL_URL,
-      root: 'goldfrite',
-      profile: { slug: profileSlug },
-      account: account,
-      cleaning: {
-        enabled: false
-      },
-      java: java,
-      memory: {
-        min: +settings.memory.min * 1024,
-        max: +settings.memory.max * 1024
-      },
-      window: {
-        width: settings.resolution.width,
-        height: settings.resolution.height,
-        fullscreen: settings.resolution.fullscreen
-      }
-    })
+function findJava(settings: IGameSettings): string {
+  if (settings.java !== 'bundled' && settings.java !== 'system') return settings.java
 
-    launcher.on('launch_compute_download', () => {
-      logger.log('Computing download...')
-      mainWindow.webContents.send('game:launch_compute_download')
-    })
-
-    launcher.on('launch_download', (download) => {
-      logger.log(`Downloading ${download.total.amount} files (${download.total.size} B).`)
-      mainWindow.webContents.send('game:launch_download', download)
-    })
-    launcher.on('download_progress', (progress) => {
-      mainWindow.webContents.send('game:download_progress', progress)
-    })
-    launcher.on('download_error', (error) => {
-      logger.error(`Error downloading ${error.filename}: ${error.message}`)
-      mainWindow.webContents.send('game:download_error', error)
-    })
-    launcher.on('download_end', (info) => {
-      logger.log(`Downloaded ${info.downloaded.amount} files.`)
-      mainWindow.webContents.send('game:download_end', info)
-    })
-
-    launcher.on('launch_install_loader', (loader) => {
-      logger.log(`Installing loader ${loader.type} ${loader.loaderVersion}...`)
-      mainWindow.webContents.send('game:launch_install_loader', loader)
-    })
-
-    launcher.on('launch_extract_natives', () => {
-      logger.log('Extracting natives...')
-      mainWindow.webContents.send('game:launch_extract_natives')
-    })
-    launcher.on('extract_progress', (progress) => {
-      logger.log(`Extracted ${progress.filename}.`)
-      mainWindow.webContents.send('game:extract_progress', progress)
-    })
-    launcher.on('extract_end', (info) => {
-      logger.log(`Extracted ${info.amount} files.`)
-      mainWindow.webContents.send('game:extract_end', info)
-    })
-
-    launcher.on('launch_copy_assets', () => {
-      logger.log('Copying assets...')
-      mainWindow.webContents.send('game:launch_copy_assets')
-    })
-    launcher.on('copy_progress', (progress) => {
-      logger.log(`Copied ${progress.filename} to ${progress.dest}.`)
-      mainWindow.webContents.send('game:copy_progress', progress)
-    })
-    launcher.on('copy_end', (info) => {
-      logger.log(`Copied ${info.amount} files.`)
-      mainWindow.webContents.send('game:copy_end', info)
-    })
-
-    launcher.on('launch_patch_loader', () => {
-      logger.log('Patching loader...')
-      mainWindow.webContents.send('game:launch_patch_loader')
-    })
-    launcher.on('patch_progress', (progress) => {
-      mainWindow.webContents.send('game:patch_progress', progress)
-    })
-    launcher.on('patch_error', (error) => {
-      logger.error(`Error patching ${error.filename}: ${error.message}`)
-      mainWindow.webContents.send('game:patch_error', error)
-    })
-    launcher.on('patch_end', (info) => {
-      logger.log(`Patched ${info.amount} files.`)
-      mainWindow.webContents.send('game:patch_end', info)
-    })
-
-    launcher.on('launch_check_java', () => {
-      logger.log('Checking Java...')
-      mainWindow.webContents.send('game:launch_check_java')
-    })
-    launcher.on('java_info', (info) => {
-      logger.log(`Using Java ${info.version} ${info.arch}`)
-      mainWindow.webContents.send('game:java_info', info)
-    })
-
-    launcher.on('launch_clean', () => {
-      logger.log('Cleaning game directory...')
-      mainWindow.webContents.send('game:launch_clean')
-    })
-    launcher.on('clean_progress', (progress) => {
-      mainWindow.webContents.send('game:clean_progress', progress)
-    })
-    launcher.on('clean_end', (info) => {
-      logger.log(`Cleaned ${info.amount} files.`)
-      mainWindow.webContents.send('game:clean_end', info)
-    })
-
-    launcher.on('launch_launch', (info) => {
-      logger.log(`Launching Minecraft ${info.version} (${info.type}${info.loaderVersion ? ` ${info.loaderVersion}` : ''})...`)
-      mainWindow.webContents.send('game:launch_launch', info)
-      if (settings.launcherAction === 'close') {
-        setTimeout(() => app.quit(), 5000)
-      } else if (settings.launcherAction === 'hide') {
-        setTimeout(() => mainWindow.minimize(), 5000)
-      }
-      mainWindow.webContents.send('game:launched')
-    })
-    launcher.on('launch_data', (message) => {
-      logger.log(message)
-      mainWindow.webContents.send('game:launch_data', message)
-    })
-    launcher.on('launch_close', (code) => {
-      logger.log(`Closed with code ${code}.`)
-      mainWindow.webContents.send('game:launch_close', code)
-    })
-
-    launcher.on('launch_debug', (message) => {
-      mainWindow.webContents.send('game:launch_debug', message)
-    })
-    launcher.on('patch_debug', (message) => {
-      mainWindow.webContents.send('game:patch_debug', message)
-    })
-
+  const bootstrapBase = path.join(app.getPath('userData'), 'bootstrap')
+  if (fs.existsSync(bootstrapBase)) {
+    const exe = process.platform === 'win32' ? 'javaw.exe' : 'java'
     try {
-      launcher.launch()
-    } catch (err) {
-      logger.error('Launcher error:', err)
-    }
+      for (const e1 of fs.readdirSync(bootstrapBase)) {
+        const c1 = path.join(bootstrapBase, e1, 'bin', exe)
+        if (fs.existsSync(c1)) return c1
+        const d1 = path.join(bootstrapBase, e1)
+        if (fs.statSync(d1).isDirectory()) {
+          for (const e2 of fs.readdirSync(d1)) {
+            const c2 = path.join(d1, e2, 'bin', exe)
+            if (fs.existsSync(c2)) return c2
+          }
+        }
+      }
+    } catch {}
+  }
+  return process.platform === 'win32' ? 'javaw' : 'java'
+}
+
+async function fetchJson(url: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const proto = url.startsWith('https') ? https : http
+    proto.get(url, { headers: { 'User-Agent': 'SpacakLauncher/1.0' } }, (res) => {
+      if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location)
+        return fetchJson(res.headers.location).then(resolve).catch(reject)
+      let data = ''
+      res.on('data', (c) => (data += c))
+      res.on('end', () => { try { resolve(JSON.parse(data)) } catch (e) { reject(e) } })
+      res.on('error', reject)
+    }).on('error', reject)
   })
 }
 
+async function downloadFile(url: string, dest: string): Promise<void> {
+  if (fs.existsSync(dest)) return
+  await fs.promises.mkdir(path.dirname(dest), { recursive: true })
+  return new Promise((resolve, reject) => {
+    const proto = url.startsWith('https') ? https : http
+    proto.get(url, { headers: { 'User-Agent': 'SpacakLauncher/1.0' } }, (res) => {
+      if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location)
+        return downloadFile(res.headers.location, dest).then(resolve).catch(reject)
+      if (res.statusCode !== 200) { reject(new Error(`HTTP ${res.statusCode}`)); return }
+      const tmp = dest + '.tmp'
+      const file = fs.createWriteStream(tmp)
+      res.pipe(file)
+      file.on('finish', () => file.close(() => { fs.renameSync(tmp, dest); resolve() }))
+      file.on('error', (e) => { try { fs.unlinkSync(tmp) } catch {} reject(e) })
+    }).on('error', reject)
+  })
+}
+
+function mavenToPath(name: string): string {
+  const [group, artifact, version] = name.split(':')
+  return `${group.replace(/\./g, '/')}/${artifact}/${version}/${artifact}-${version}.jar`
+}
+
+/** Downloads Fabric loader JSON + its libraries into profileDir if not already present. */
+async function ensureFabric(
+  profileDir: string,
+  mcVersion: string,
+  loaderVersion: string,
+  send: (label: string) => void
+): Promise<string> {
+  const versionId = `fabric-loader-${loaderVersion}-${mcVersion}`
+  const jsonDest = path.join(profileDir, 'versions', versionId, `${versionId}.json`)
+
+  if (!fs.existsSync(jsonDest)) {
+    send('Sťahujem Fabric loader...')
+    const url = `https://meta.fabricmc.net/v2/versions/loader/${mcVersion}/${loaderVersion}/profile/json`
+    const fabricJson = await fetchJson(url)
+
+    await fs.promises.mkdir(path.dirname(jsonDest), { recursive: true })
+    await fs.promises.writeFile(jsonDest, JSON.stringify(fabricJson, null, 2))
+
+    const libs = (fabricJson.libraries || []).filter((l: any) => l.url && l.name)
+    for (let i = 0; i < libs.length; i++) {
+      const lib = libs[i]
+      send(`Fabric: ${lib.name.split(':')[1]} (${i + 1}/${libs.length})`)
+      await downloadFile(lib.url + mavenToPath(lib.name), path.join(profileDir, 'libraries', mavenToPath(lib.name)))
+    }
+  }
+
+  return versionId
+}
+
+// ── handler ───────────────────────────────────────────────────────────────────
+
+export function registerLauncherHandlers(mainWindow: BrowserWindow) {
+  ipcMain.handle('game:launch', async (_event, payload: { account: Account; settings: IGameSettings; profile: any }) => {
+    const { account, settings, profile } = payload
+
+    if (!profile) {
+      logger.error('game:launch called with null profile')
+      mainWindow.webContents.send('game:launch_error', 'Žiadny profil nie je vybraný')
+      mainWindow.webContents.send('game:launch_close', -1)
+      return
+    }
+
+    const profileDir: string = profile.path || getProfileDir(profile.dir || profile.name)
+    const mcVersion: string = profile.version || '1.20.1'
+    const loaderVersion: string = profile.loaderVersion || '0.16.10'
+
+    logger.log(`Launching: ${profile.name} — Fabric ${loaderVersion} — MC ${mcVersion}`)
+    logger.log(`Dir: ${profileDir}`)
+
+    const safeSend = (channel: string, ...args: any[]) => {
+      try {
+        if (!mainWindow.isDestroyed()) mainWindow.webContents.send(channel, ...args)
+      } catch {}
+    }
+
+    const sendProgress = (label: string) => safeSend('game:setup_label', label)
+
+    try {
+      // Auto-setup Fabric if needed (first launch only)
+      sendProgress('Kontrolujem Fabric...')
+      const versionId = await ensureFabric(profileDir, mcVersion, loaderVersion, sendProgress)
+
+      // Ensure game subdirs exist (saves, mods, config…)
+      for (const d of ['mods', 'saves', 'config', 'resourcepacks', 'shaderpacks', 'screenshots', 'logs']) {
+        await fs.promises.mkdir(path.join(profileDir, d), { recursive: true })
+      }
+
+      sendProgress('Spúšťam Minecraft...')
+
+      const launcher = new Client()
+      let gameStarted = false
+
+      launcher.on('debug', (msg: any) => logger.log('[MCLC]', msg))
+
+      launcher.on('progress', (e: any) => {
+        safeSend('game:mclc_progress', e)
+      })
+
+      launcher.on('download-status', (e: any) => {
+        safeSend('game:mclc_download', e)
+      })
+
+      launcher.on('data', (msg: any) => {
+        logger.log('[MC]', msg)
+        safeSend('game:launch_data', msg)
+        if (!gameStarted) {
+          gameStarted = true
+          safeSend('game:launched')
+          if (settings.launcherAction === 'close') {
+            setTimeout(() => { if (!mainWindow.isDestroyed()) app.quit() }, 8000)
+          } else if (settings.launcherAction === 'hide') {
+            setTimeout(() => { if (!mainWindow.isDestroyed()) mainWindow.minimize() }, 8000)
+          }
+        }
+      })
+
+      launcher.on('close', (code: any) => {
+        logger.log(`Minecraft closed: ${code}`)
+        safeSend('game:launch_close', code)
+      })
+
+      launcher.on('error', (err: any) => {
+        logger.error('MCLC error:', err)
+        safeSend('game:launch_close', -1)
+        safeSend('game:launch_error', String(err))
+      })
+
+      launcher.launch({
+        authorization: {
+          access_token: (account as any).accessToken || '',
+          client_token: account.uuid,
+          uuid: account.uuid,
+          name: account.name,
+          user_properties: '{}',
+          meta: {
+            type: (account as any).meta?.type || 'msa',
+            xuid: (account as any).xuid || (account as any).meta?.xuid || ''
+          }
+        },
+        root: profileDir,
+        version: {
+          number: mcVersion,
+          type: 'release',
+          custom: versionId
+        },
+        memory: {
+          max: `${Math.round(settings.memory.max * 1024)}`,
+          min: `${Math.round(settings.memory.min * 1024)}`
+        },
+        window: {
+          width: settings.resolution.width,
+          height: settings.resolution.height,
+          fullscreen: settings.resolution.fullscreen
+        },
+        javaPath: findJava(settings),
+        overrides: {
+          gameDirectory: profileDir,
+          maxSockets: 4
+        }
+      } as any)
+
+    } catch (err: any) {
+      logger.error('Launch failed:', err)
+      mainWindow.webContents.send('game:launch_close', -1)
+      mainWindow.webContents.send('game:launch_error', err.message)
+    }
+  })
+}

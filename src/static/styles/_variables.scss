@@ -1,24 +1,32 @@
 :root {
   /* Colors */
-  --primary: #ff5722;
-  --primary-hover: #e64a19;
+  --primary: #4ade80;
+  --primary-hover: #22c55e;
+  --primary-dim: rgba(74, 222, 128, 0.18);
+  --primary-glow: rgba(74, 222, 128, 0.35);
+  --primary-deep: rgba(74, 222, 128, 0.08);
 
+  --bg-dark: #030803;
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
 
-  --bg-dark: #121212;
-  --text-main: #ffffff;
-  --text-muted: #aaaaaa;
-
-  /* Glassmorphism */
-  --glass-bg: rgba(30, 30, 30, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: 12px;
+  /* Glassmorphism - iOS 26 Liquid Glass */
+  --glass-bg: rgba(5, 15, 7, 0.72);
+  --glass-bg-light: rgba(8, 24, 10, 0.58);
+  --glass-border: rgba(74, 222, 128, 0.13);
+  --glass-border-bright: rgba(74, 222, 128, 0.30);
+  --glass-blur: 22px;
+  --glass-highlight: rgba(255, 255, 255, 0.045);
+  --glass-highlight-top: rgba(74, 222, 128, 0.09);
 
   /* Shadows */
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(74, 222, 128, 0.06);
+  --shadow-glow: 0 0 30px rgba(74, 222, 128, 0.15);
 
   /* Layout */
   --sidebar-width: 400px;
 
   /* UI System */
-  --btn-radius: 5px;
+  --btn-radius: 10px;
+  --card-radius: 14px;
 }

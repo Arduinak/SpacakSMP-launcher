@@ -36,17 +36,28 @@ a {
 .app-background {
   position: absolute;
   inset: 0;
-  // background-image: url('/src/assets/bg.jpg');
   background-size: cover;
   background-position: center;
   z-index: -1;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 20% 50%, rgba(34, 197, 94, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 80% at 80% 30%, rgba(74, 222, 128, 0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 60% 90%, rgba(16, 185, 129, 0.06) 0%, transparent 60%);
+    z-index: 1;
+  }
 
   &::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
+    background: rgba(3, 8, 3, 0.62);
+    backdrop-filter: blur(10px);
+    z-index: 0;
   }
 }
 
@@ -67,10 +78,11 @@ a {
   }
 
   &.overlay {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.75);
     justify-content: center;
     align-items: center;
     z-index: 100;
+    backdrop-filter: blur(8px);
   }
 }
 
@@ -104,25 +116,25 @@ a {
   cursor: pointer;
   transition: all 0.2s ease;
 
-  /* Disable selection */
   user-select: none;
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 }
 
-/* Primary Button (Orange) */
+/* Primary Button (Green) */
 .btn-primary {
-  background: var(--primary);
-  color: white;
-  box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  color: #030b04;
+  font-weight: 700;
+  box-shadow: 0 4px 16px var(--primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 
   &:hover:not(:disabled) {
-    background: var(--primary-hover);
+    background: linear-gradient(135deg, #6ee7a0 0%, var(--primary) 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(255, 87, 34, 0.4);
+    box-shadow: 0 6px 24px var(--primary-glow);
   }
 
   &:active:not(:disabled) {
@@ -130,51 +142,54 @@ a {
   }
 }
 
-/* Secondary Button (Dark/Glass) */
+/* Secondary Button (Dark Glass) */
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ddd;
+  background: var(--glass-bg-light);
+  border: 1px solid var(--glass-border);
+  color: #a7f3c0;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: inset 0 1px 0 var(--glass-highlight-top), inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: white;
+    background: rgba(12, 32, 16, 0.65);
+    border-color: var(--glass-border-bright);
+    color: var(--text-main);
     text-decoration: none;
+    box-shadow: inset 0 1px 0 var(--glass-highlight-top), 0 0 12px var(--primary-deep);
   }
 }
 
 /* Danger Button (Red) */
 .btn-danger {
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid rgba(244, 67, 54, 0.5);
-  color: #ff5252;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #f87171;
 
   &:hover:not(:disabled) {
-    background: rgba(244, 67, 54, 0.2);
-    border-color: #f44336;
+    background: rgba(220, 38, 38, 0.20);
+    border-color: #ef4444;
   }
 }
 
-/* Icon Button (Square/Round for icons only) */
+/* Icon Button */
 .btn-icon-only {
   width: 36px;
   height: 36px;
   padding: 0;
   border-radius: 50%;
-  /* Circle */
   background: transparent;
-  color: #aaa;
+  color: var(--text-muted);
   border: 1px solid transparent;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(74, 222, 128, 0.08);
+    border-color: var(--glass-border);
+    color: var(--primary);
     text-decoration: none;
   }
 }
 
-/* Link Button (Looks like text, behaves like button) */
+/* Link Button */
 .btn-text {
   background: transparent;
   padding: 5px 10px;
@@ -182,19 +197,22 @@ a {
 
   &:hover {
     color: var(--primary);
-    background: rgba(255, 87, 34, 0.1);
+    background: var(--primary-deep);
   }
 }
 
 /* Brand Button: Microsoft */
 .btn-microsoft {
-  background: #2f2f2f;
-  color: white;
-  border: 1px solid #444;
+  background: rgba(10, 22, 12, 0.70);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
   width: 100%;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: inset 0 1px 0 var(--glass-highlight-top);
 
   &:hover {
-    background: #3f3f3f;
-    border-color: #666;
+    background: rgba(16, 36, 18, 0.80);
+    border-color: var(--glass-border-bright);
+    box-shadow: inset 0 1px 0 var(--glass-highlight-top), 0 0 16px var(--primary-deep);
   }
 }

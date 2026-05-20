@@ -27,7 +27,7 @@ export function logout() {
 }
 
 async function updateUserInterface() {
-  if (!shared.account || !shared.skins) return
+  if (!shared.account) return
 
   logger.log('Updating UI for user:', shared.account.name)
 

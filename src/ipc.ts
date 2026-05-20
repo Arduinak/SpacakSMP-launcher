@@ -7,7 +7,6 @@ import type {
   DownloaderEvents,
   FilesManagerEvents,
   IBackground,
-  IBootstraps,
   IMaintenance,
   INews,
   IServerStatus,
@@ -15,7 +14,6 @@ import type {
   JavaEvents,
   LauncherEvents,
   PatcherEvents,
-  IProfile,
   ISkin,
   ICape,
   IAvatar
@@ -29,20 +27,22 @@ declare global {
         refresh: () => Promise<IAuthResponse>
         logout: () => Promise<{ success: boolean }>
       }
+      install: {
+        check: (dirName: string) => Promise<{ installed: boolean; modsCount: number; savesCount: number; fabricVersionId: string }>
+        openFolder: (dirName: string) => Promise<void>
+      }
       skin: {
         reload: (account?: Account) => Promise<void | null>
         getSkin: (account?: Account) => Promise<ISkin[] | null>
         getCape: (account?: Account) => Promise<ICape[] | null>
         getAvatar: (account?: Account) => Promise<IAvatar | null>
         updateSkin: (source: string | ArrayBuffer, model?: 'classic' | 'slim') => Promise<ISkin[] | null>
-        // updateCape: (source: string | Blob) => Promise<ICape[] | null> --- Not implemented with Microsoft accounts ---
         switchCape: (id: string) => Promise<ICape[] | null>
         deleteSkin: (id: string) => Promise<ISkin[] | null>
-        // deleteCape: () => Promise<ICape[] | null> --- Not implemented with Microsoft accounts ---
         hideCape: () => Promise<ICape[] | null>
       }
       profiles: {
-        get: () => Promise<IProfile[]>
+        get: () => Promise<any[]>
       }
       server: {
         getStatus: (ip: string, port?: number) => Promise<IServerStatus | null>
@@ -58,46 +58,42 @@ declare global {
         get: () => Promise<IMaintenance | null>
       }
       bootstraps: {
-        check: () => Promise<IBootstraps>
-        download: () => Promise<string>
+        check: () => Promise<{ updateAvailable: boolean }>
+        download: () => Promise<void>
         install: () => Promise<void>
         downloadProgress: (callback: (value: DownloaderEvents['download_progress'][0]) => void) => void
         downloadEnd: (callback: (value: DownloaderEvents['download_end'][0]) => void) => void
         error: (callback: (value: BootstrapsEvents['bootstraps_error'][0]) => void) => void
       }
       game: {
-        launch: (payload: { account: Account; settings: IGameSettings, profileSlug: string }) => Promise<void>
-
+        launch: (payload: { account: Account; settings: IGameSettings; profile: any }) => Promise<void>
+        mclcProgress: (callback: (e: any) => void) => void
+        mclcDownload: (callback: (e: any) => void) => void
+        setupLabel: (callback: (label: string) => void) => void
+        launchError: (callback: (msg: string) => void) => void
         launchComputeDownload: (callback: () => void) => void
-
         launchDownload: (callback: (value: LauncherEvents['launch_download'][0]) => void) => void
         downloadProgress: (callback: (value: DownloaderEvents['download_progress'][0]) => void) => void
         downloadError: (callback: (value: DownloaderEvents['download_error'][0]) => void) => void
         downloadEnd: (callback: (value: DownloaderEvents['download_end'][0]) => void) => void
-
         launchInstallLoader: (callback: (value: LauncherEvents['launch_install_loader'][0]) => void) => void
-
         launchExtractNatives: (callback: () => void) => void
         extractProgress: (callback: (value: FilesManagerEvents['extract_progress'][0]) => void) => void
         extractEnd: (callback: (value: FilesManagerEvents['extract_end'][0]) => void) => void
         launchCopyAssets: (callback: () => void) => void
         copyProgress: (callback: (value: FilesManagerEvents['copy_progress'][0]) => void) => void
         copyEnd: (callback: (value: FilesManagerEvents['copy_end'][0]) => void) => void
-
         launchPatchLoader: (callback: () => void) => void
         patchProgress: (callback: (value: PatcherEvents['patch_progress'][0]) => void) => void
         patchError: (callback: (value: PatcherEvents['patch_error'][0]) => void) => void
         patchEnd: (callback: (value: PatcherEvents['patch_end'][0]) => void) => void
-
         launchCheckJava: (callback: () => void) => void
         javaInfo: (callback: (value: JavaEvents['java_info'][0]) => void) => void
-
         launchClean: (callback: () => void) => void
         cleanProgress: (callback: (value: CleanerEvents['clean_progress'][0]) => void) => void
         cleanEnd: (callback: (value: CleanerEvents['clean_end'][0]) => void) => void
         launchLaunch: (callback: (value: LauncherEvents['launch_launch'][0]) => void) => void
         launched: (callback: () => void) => void
-
         launchData: (callback: (value: LauncherEvents['launch_data'][0]) => void) => void
         launchClose: (callback: (value: any) => void) => void
         launchDebug: (callback: (value: LauncherEvents['launch_debug'][0]) => void) => void
@@ -121,16 +117,19 @@ export const auth = {
   refresh: async () => await window.api.auth.refresh()
 }
 
+export const install = {
+  check: (dirName: string) => window.api.install.check(dirName),
+  openFolder: (dirName: string) => window.api.install.openFolder(dirName)
+}
+
 export const skin = {
   reload: async (account?: Account) => await window.api.skin.reload(account),
   getSkin: async (account?: Account) => await window.api.skin.getSkin(account),
   getCape: async (account?: Account) => await window.api.skin.getCape(account),
   getAvatar: async (account?: Account) => await window.api.skin.getAvatar(account),
   updateSkin: async (source: string | ArrayBuffer, model: 'classic' | 'slim') => await window.api.skin.updateSkin(source, model),
-  // updateCape: async (source: string | Blob) => await window.api.skin.updateCape(source), --- Not implemented with Microsoft accounts ---
   switchCape: async (id: string) => await window.api.skin.switchCape(id),
   deleteSkin: async (id: string) => await window.api.skin.deleteSkin(id),
-  // deleteCape: async () => await window.api.skin.deleteCape(), --- Not implemented with Microsoft accounts ---
   hideCape: async () => await window.api.skin.hideCape()
 }
 
@@ -165,7 +164,11 @@ export const bootstraps = {
 }
 
 export const game = {
-  launch: async (payload: { account: Account; settings: IGameSettings, profileSlug: string }) => await window.api.game.launch(payload),
+  launch: async (payload: { account: Account; settings: IGameSettings; profile: any }) => await window.api.game.launch(payload),
+  mclcProgress: (cb: (e: any) => void) => window.api.game.mclcProgress(cb),
+  mclcDownload: (cb: (e: any) => void) => window.api.game.mclcDownload(cb),
+  setupLabel: (cb: (label: string) => void) => window.api.game.setupLabel(cb),
+  launchError: (cb: (msg: string) => void) => window.api.game.launchError(cb),
   launchComputeDownload: (callback: () => void) => window.api.game.launchComputeDownload(callback),
   launchDownload: (callback: (value: LauncherEvents['launch_download'][0]) => void) => window.api.game.launchDownload(callback),
   downloadProgress: (callback: (value: DownloaderEvents['download_progress'][0]) => void) => window.api.game.downloadProgress(callback),
@@ -204,5 +207,3 @@ export const settings = {
 export const system = {
   getInfo: () => window.api.system.getInfo()
 }
-
-

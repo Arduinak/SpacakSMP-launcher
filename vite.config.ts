@@ -9,7 +9,14 @@ export default defineConfig({
   plugins: [
     electron([
       {
-        entry: 'electron/main.ts'
+        entry: 'electron/main.ts',
+        vite: {
+          build: {
+            rollupOptions: {
+              external: ['minecraft-launcher-core']
+            }
+          }
+        }
       },
       {
         entry: 'electron/preload.ts',
@@ -26,4 +33,3 @@ export default defineConfig({
     ])
   ]
 })
-

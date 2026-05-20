@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher *)",
+      "Bash(gh repo *)",
+      "Bash(git clone *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher\\\\temp_template\" -Force -Recurse | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher\\\\temp_template\\\\\", \"\"\\) })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher\" -Force | Where-Object { $_.Name -ne \".git\" -and $_.Name -ne \"temp_template\" } | Select-Object Name)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(pkill -f electron)",
+      "Bash(awk '{print $4}')",
+      "Bash(pkill -f \"electron\\\\|vite\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const p=fs.readdirSync\\('Profiles/Profile 1'\\); console.log\\(p\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(node *)",
+      "Bash(Rename-Item C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher\\\\Profiles\\\\Profile 1 *)",
+      "PowerShell(Rename-Item *)",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-MpThreatDetection *)",
+      "PowerShell(Get-MpPreference *)",
+      "PowerShell(Start-Process powershell -Verb RunAs -ArgumentList \"-Command Add-MpPreference -ExclusionPath 'C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher'; Add-MpPreference -ExclusionPath 'C:\\\\Users\\\\Alex\\\\AppData\\\\Local\\\\electron-builder'; Write-Host 'Exclusions pridane'\" -Wait 2>&1)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher\\\\release\" | Where-Object { -not $_.PSIsContainer } | Select-Object Name, @{N='Size';E={\"{0:N1} MB\" -f \\($_.Length/1MB\\)}})",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Alex\\\\Desktop\\\\Launcher\\\\release\" | Select-Object Name, @{N='Size';E={if\\($_.PSIsContainer\\){\"<dir>\"}else{\"{0:N1} MB\" -f \\($_.Length/1MB\\)}}})",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}

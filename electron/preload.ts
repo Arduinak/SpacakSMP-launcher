@@ -9,7 +9,6 @@ import type {
   FilesManagerEvents,
   IAvatar,
   IBackground,
-  IBootstraps,
   ICape,
   IMaintenance,
   INews,
@@ -31,13 +30,21 @@ contextBridge.exposeInMainWorld('api', {
   profiles: {
     get: (): Promise<any[]> => ipcRenderer.invoke('profiles:get')
   },
+  install: {
+    check: (dirName: string): Promise<any> => ipcRenderer.invoke('install:check', dirName),
+    openFolder: (dirName: string): Promise<void> => ipcRenderer.invoke('install:open_folder', dirName)
+  },
   game: {
-    launch: (payload: { account: Account; settings: IGameSettings; profileSlug: string }) => {
+    launch: (payload: { account: Account; settings: IGameSettings; profile: any }) => {
       ipcRenderer.invoke('game:launch', payload)
     },
 
-    launchComputeDownload: (callback: () => void) => ipcRenderer.on('game:launch_compute_download', (_event) => callback()),
+    mclcProgress: (callback: (e: any) => void) => ipcRenderer.on('game:mclc_progress', (_event, e) => callback(e)),
+    mclcDownload: (callback: (e: any) => void) => ipcRenderer.on('game:mclc_download', (_event, e) => callback(e)),
+    setupLabel: (callback: (label: string) => void) => ipcRenderer.on('game:setup_label', (_event, label) => callback(label)),
+    launchError: (callback: (msg: string) => void) => ipcRenderer.on('game:launch_error', (_event, msg) => callback(msg)),
 
+    launchComputeDownload: (callback: () => void) => ipcRenderer.on('game:launch_compute_download', (_event) => callback()),
     launchDownload: (callback: (value: LauncherEvents['launch_download'][0]) => void) =>
       ipcRenderer.on('game:launch_download', (_event, value) => callback(value)),
     downloadProgress: (callback: (value: DownloaderEvents['download_progress'][0]) => void) =>
@@ -46,10 +53,8 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on('game:download_error', (_event, value) => callback(value)),
     downloadEnd: (callback: (value: DownloaderEvents['download_end'][0]) => void) =>
       ipcRenderer.on('game:download_end', (_event, value) => callback(value)),
-
     launchInstallLoader: (callback: (value: LauncherEvents['launch_install_loader'][0]) => void) =>
       ipcRenderer.on('game:launch_install_loader', (_event, value) => callback(value)),
-
     launchExtractNatives: (callback: () => void) => ipcRenderer.on('game:launch_extract_natives', (_event) => callback()),
     extractProgress: (callback: (value: FilesManagerEvents['extract_progress'][0]) => void) =>
       ipcRenderer.on('game:extract_progress', (_event, value) => callback(value)),
@@ -67,7 +72,6 @@ contextBridge.exposeInMainWorld('api', {
     patchEnd: (callback: (value: PatcherEvents['patch_end'][0]) => void) => ipcRenderer.on('game:patch_end', (_event, value) => callback(value)),
     launchCheckJava: (callback: () => void) => ipcRenderer.on('game:launch_check_java', (_event) => callback()),
     javaInfo: (callback: (value: JavaEvents['java_info'][0]) => void) => ipcRenderer.on('game:java_info', (_event, value) => callback(value)),
-
     launchClean: (callback: () => void) => ipcRenderer.on('game:launch_clean', (_event) => callback()),
     cleanProgress: (callback: (value: CleanerEvents['clean_progress'][0]) => void) =>
       ipcRenderer.on('game:clean_progress', (_event, value) => callback(value)),
@@ -75,7 +79,6 @@ contextBridge.exposeInMainWorld('api', {
     launchLaunch: (callback: (value: LauncherEvents['launch_launch'][0]) => void) =>
       ipcRenderer.on('game:launch_launch', (_event, value) => callback(value)),
     launched: (callback: () => void) => ipcRenderer.on('game:launched', (_event) => callback()),
-
     launchData: (callback: (value: LauncherEvents['launch_data'][0]) => void) =>
       ipcRenderer.on('game:launch_data', (_event, value) => callback(value)),
     launchClose: (callback: (value: any) => void) => ipcRenderer.on('game:launch_close', (_event, value) => callback(value)),
@@ -89,10 +92,8 @@ contextBridge.exposeInMainWorld('api', {
     getCape: (account?: Account): Promise<ICape[] | null> => ipcRenderer.invoke('skin:get_cape', account),
     getAvatar: (account?: Account): Promise<IAvatar | null> => ipcRenderer.invoke('skin:get_avatar', account),
     updateSkin: (source: string | Blob, model?: 'classic' | 'slim'): Promise<ISkin[] | null> => ipcRenderer.invoke('skin:update_skin', source, model),
-    // updateCape: (source: string | Blob): Promise<ICape[] | null> => ipcRenderer.invoke('skin:update_cape', source), --- Not implemented with Microsoft accounts ---
     switchCape: (id: string): Promise<ICape[] | null> => ipcRenderer.invoke('skin:switch_cape', id),
     deleteSkin: (id: string): Promise<ISkin[] | null> => ipcRenderer.invoke('skin:delete_skin', id),
-    // deleteCape: (): Promise<ICape[] | null> => ipcRenderer.invoke('skin:delete_cape'), --- Not implemented with Microsoft accounts ---
     hideCape: (): Promise<ICape[] | null> => ipcRenderer.invoke('skin:hide_cape')
   },
   server: {
@@ -109,7 +110,7 @@ contextBridge.exposeInMainWorld('api', {
     get: (): Promise<IMaintenance | null> => ipcRenderer.invoke('maintenance:get')
   },
   bootstraps: {
-    check: (): Promise<IBootstraps> => ipcRenderer.invoke('bootstraps:check'),
+    check: (): Promise<{ updateAvailable: boolean }> => ipcRenderer.invoke('bootstraps:check'),
     download: (): Promise<string> => ipcRenderer.invoke('bootstraps:download'),
     install: (): Promise<void> => ipcRenderer.invoke('bootstraps:install'),
     downloadProgress: (callback: (value: DownloaderEvents['download_progress'][0]) => void) =>
@@ -128,4 +129,3 @@ contextBridge.exposeInMainWorld('api', {
     getInfo: (): Promise<ISystemInfo> => ipcRenderer.invoke('system:info')
   }
 })
-

@@ -7,12 +7,14 @@ div.maintenance-card {
 
   h3 {
     font-size: 21px;
+    color: var(--text-main);
   }
 
   .gears {
     font-size: 2rem;
-    color: #ffffff;
+    color: var(--primary);
     margin-bottom: 1rem;
+    filter: drop-shadow(0 0 10px var(--primary-glow));
   }
 
   .dates {
@@ -20,9 +22,11 @@ div.maintenance-card {
     margin-bottom: 0.7rem;
     margin-top: 0.2rem;
     font-size: 14px;
+    color: var(--text-muted);
   }
 
   .text {
     opacity: 1;
+    color: var(--text-muted);
   }
 }

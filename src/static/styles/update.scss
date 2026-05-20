@@ -7,12 +7,14 @@ div.maintenance-card {
 
   h3 {
     font-size: 21px;
+    color: var(--text-main);
   }
 
   .up {
     font-size: 2rem;
-    color: #ffffff;
+    color: var(--primary);
     margin-bottom: 1rem;
+    filter: drop-shadow(0 0 12px var(--primary-glow));
   }
 
   .text {
@@ -40,7 +42,7 @@ div.maintenance-card {
 
   .progress-bar-bg {
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(74, 222, 128, 0.08);
     border-radius: 2px;
     overflow: hidden;
   }
@@ -48,7 +50,8 @@ div.maintenance-card {
   .progress-bar-fill {
     height: 100%;
     width: 0%;
-    background: var(--primary);
+    background: linear-gradient(90deg, var(--primary-hover), var(--primary));
+    box-shadow: 0 0 8px var(--primary-glow);
 
     &.indeterminate {
       width: 30% !important;
