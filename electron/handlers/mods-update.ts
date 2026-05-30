@@ -8,7 +8,7 @@ import AdmZip from 'adm-zip'
 import logger from 'electron-log/main'
 import { getProfilesDir } from './install'
 
-const UPDATE_YML_URL = 'https://raw.githubusercontent.com/Arduinak/SpacakSMP-launcher/main/update.yml'
+const UPDATE_YML_URL = 'https://api.github.com/repos/Arduinak/SpacakSMP-launcher/contents/update.yml'
 
 function getVersionFilePath(): string {
   return path.join(app.getPath('userData'), 'mods_version.json')
@@ -31,7 +31,7 @@ function saveLocalVersion(version: string): void {
 async function fetchText(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const proto = url.startsWith('https') ? https : http
-    proto.get(url, { headers: { 'User-Agent': 'SpacakLauncher/1.0' } }, (res) => {
+    proto.get(url, { headers: { 'User-Agent': 'SpacakLauncher/1.0', 'Accept': 'application/vnd.github.raw+json' } }, (res) => {
       if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
         return fetchText(res.headers.location).then(resolve).catch(reject)
       }
