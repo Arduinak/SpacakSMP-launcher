@@ -132,18 +132,19 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow) {
     try {
       let versionId: string
 
+      let forgeInstallerPath: string | null = null
+
       if (loader === 'forge') {
         sendProgress('Kontrolujem Forge...')
-        const versionsDir = path.join(profileDir, 'versions')
-        const forgeEntry = fs.existsSync(versionsDir)
-          ? fs.readdirSync(versionsDir).find((e) => e.startsWith(`${mcVersion}-forge`))
+        const installerFile = fs.existsSync(profileDir)
+          ? fs.readdirSync(profileDir).find((f) => f.startsWith('forge-') && f.endsWith('-installer.jar'))
           : undefined
-        if (!forgeEntry || !fs.existsSync(path.join(versionsDir, forgeEntry, `${forgeEntry}.json`))) {
-          safeSend('game:launch_error', 'Forge nie je nainštalovaný. Najprv spusti inštaláciu profilu.')
+        if (!installerFile) {
+          safeSend('game:launch_error', 'Forge installer JAR nenájdený. Daj forge-installer.jar do priečinka profilu.')
           safeSend('game:launch_close', -1)
           return
         }
-        versionId = forgeEntry
+        forgeInstallerPath = path.join(profileDir, installerFile)
       } else {
         // Auto-setup Fabric if needed (first launch only)
         sendProgress('Kontrolujem Fabric...')
@@ -211,8 +212,9 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow) {
         version: {
           number: mcVersion,
           type: 'release',
-          custom: versionId
+          ...(loader !== 'forge' && { custom: versionId })
         },
+        ...(forgeInstallerPath && { forge: forgeInstallerPath }),
         memory: {
           max: `${Math.round(settings.memory.max * 1024)}`,
           min: `${Math.round(settings.memory.min * 1024)}`
