@@ -66,10 +66,13 @@ async function downloadBuffer(url: string, onProgress: (downloaded: number, tota
   })
 }
 
-function parseVersion(yaml: string): string | null {
-  const m = yaml.match(/^version:\s*["']?([^\s"'\r\n]+)["']?/m)
-  return m ? m[1] : null
+function parseYml(yaml: string): { version: string | null; url: string | null } {
+  const vm = yaml.match(/^version:\s*["']?([^\s"'\r\n]+)["']?/m)
+  const um = yaml.match(/^url:\s*["']?([^\s"'\r\n]+)["']?/m)
+  return { version: vm ? vm[1] : null, url: um ? um[1] : null }
 }
+
+let pendingModsZipUrl: string | null = null
 
 function getFirstProfileModsDir(): string | null {
   const profilesDir = getProfilesDir()
@@ -84,10 +87,11 @@ export function registerModsUpdateHandlers(mainWindow: Electron.BrowserWindow) {
   ipcMain.handle('mods-update:check', async () => {
     try {
       const yaml = await fetchText(UPDATE_YML_URL)
-      const remoteVersion = parseVersion(yaml)
+      const { version: remoteVersion, url } = parseYml(yaml)
       if (!remoteVersion) return { updateAvailable: false }
+      pendingModsZipUrl = url
       const localVersion = getLocalVersion()
-      logger.log(`Mods version — local: ${localVersion}, remote: ${remoteVersion}`)
+      logger.log(`Mods version — local: ${localVersion}, remote: ${remoteVersion}, url: ${url}`)
       return { updateAvailable: remoteVersion !== localVersion, remoteVersion }
     } catch (err) {
       logger.error('Mods update check failed:', err)
@@ -112,8 +116,9 @@ export function registerModsUpdateHandlers(mainWindow: Electron.BrowserWindow) {
       }
       await fs.promises.mkdir(modsDir, { recursive: true })
 
-      // Download mods.zip from the release matching the remote version tag
-      const modsZipUrl = `https://github.com/Arduinak/SpacakSMP-launcher/releases/download/v.${remoteVersion}/mods.zip`
+      // Use URL from update.yml if present, otherwise fall back to version tag
+      const modsZipUrl = pendingModsZipUrl ?? `https://github.com/Arduinak/SpacakSMP-launcher/releases/download/v.${remoteVersion}/mods.zip`
+      logger.log('Downloading mods from:', modsZipUrl)
       const buffer = await downloadBuffer(modsZipUrl, (downloaded, total) => {
         safeSend('mods-update:progress', {
           downloaded: { size: downloaded },
