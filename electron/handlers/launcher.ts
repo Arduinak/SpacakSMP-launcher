@@ -116,8 +116,9 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow) {
     const profileDir: string = profile.path || getProfileDir(profile.dir || profile.name)
     const mcVersion: string = profile.version || '1.20.1'
     const loaderVersion: string = profile.loaderVersion || '0.16.10'
+    const loader: string = profile.loader || 'fabric'
 
-    logger.log(`Launching: ${profile.name} — Fabric ${loaderVersion} — MC ${mcVersion}`)
+    logger.log(`Launching: ${profile.name} — ${loader} — MC ${mcVersion}`)
     logger.log(`Dir: ${profileDir}`)
 
     const safeSend = (channel: string, ...args: any[]) => {
@@ -129,9 +130,25 @@ export function registerLauncherHandlers(mainWindow: BrowserWindow) {
     const sendProgress = (label: string) => safeSend('game:setup_label', label)
 
     try {
-      // Auto-setup Fabric if needed (first launch only)
-      sendProgress('Kontrolujem Fabric...')
-      const versionId = await ensureFabric(profileDir, mcVersion, loaderVersion, sendProgress)
+      let versionId: string
+
+      if (loader === 'forge') {
+        sendProgress('Kontrolujem Forge...')
+        const versionsDir = path.join(profileDir, 'versions')
+        const forgeEntry = fs.existsSync(versionsDir)
+          ? fs.readdirSync(versionsDir).find((e) => e.startsWith(`${mcVersion}-forge`))
+          : undefined
+        if (!forgeEntry || !fs.existsSync(path.join(versionsDir, forgeEntry, `${forgeEntry}.json`))) {
+          safeSend('game:launch_error', 'Forge nie je nainštalovaný. Najprv spusti inštaláciu profilu.')
+          safeSend('game:launch_close', -1)
+          return
+        }
+        versionId = forgeEntry
+      } else {
+        // Auto-setup Fabric if needed (first launch only)
+        sendProgress('Kontrolujem Fabric...')
+        versionId = await ensureFabric(profileDir, mcVersion, loaderVersion, sendProgress)
+      }
 
       // Ensure game subdirs exist (saves, mods, config…)
       for (const d of ['mods', 'saves', 'config', 'resourcepacks', 'shaderpacks', 'screenshots', 'logs']) {
