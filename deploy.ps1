@@ -22,7 +22,9 @@ if ($LASTEXITCODE -ne 0) { throw "Build zlyhal" }
 Write-Host ""
 Write-Host "==> Packaging..." -ForegroundColor Cyan
 Remove-Item "release\win-unpacked" -Recurse -Force -ErrorAction SilentlyContinue
-npx electron-builder --win --dir 2>&1 | Out-Null
+$prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+npx electron-builder --win --dir 2>$null | Out-Null
+$ErrorActionPreference = $prev
 
 $unpacked = "release\win-unpacked"
 $src = "node_modules\electron\dist"
@@ -54,9 +56,9 @@ if ($LASTEXITCODE -ne 0) { throw "Installer zlyhal" }
 Write-Host ""
 Write-Host "==> Vytváram GitHub Release $tag..." -ForegroundColor Cyan
 
-$exe      = "release\Spacak Launcher-Setup-$version.exe"
+$exe      = "release\SpacakLauncher-Setup-$version.exe"
 $yml      = "release\latest.yml"
-$blockmap = "release\Spacak Launcher-Setup-$version.exe.blockmap"
+$blockmap = "release\SpacakLauncher-Setup-$version.exe.blockmap"
 
 gh release create $tag $exe $yml $blockmap `
   --title "Spacak Launcher $tag" `

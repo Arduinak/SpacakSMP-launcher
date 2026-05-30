@@ -9,7 +9,6 @@ import logger from 'electron-log/main'
 import { getProfilesDir } from './install'
 
 const UPDATE_YML_URL = 'https://raw.githubusercontent.com/Arduinak/SpacakSMP-launcher/main/update.yml'
-const MODS_ZIP_URL = 'https://github.com/Arduinak/SpacakSMP-launcher/releases/latest/download/mods.zip'
 
 function getVersionFilePath(): string {
   return path.join(app.getPath('userData'), 'mods_version.json')
@@ -113,8 +112,9 @@ export function registerModsUpdateHandlers(mainWindow: Electron.BrowserWindow) {
       }
       await fs.promises.mkdir(modsDir, { recursive: true })
 
-      // Download mods.zip
-      const buffer = await downloadBuffer(MODS_ZIP_URL, (downloaded, total) => {
+      // Download mods.zip from the release matching the remote version tag
+      const modsZipUrl = `https://github.com/Arduinak/SpacakSMP-launcher/releases/download/v.${remoteVersion}/mods.zip`
+      const buffer = await downloadBuffer(modsZipUrl, (downloaded, total) => {
         safeSend('mods-update:progress', {
           downloaded: { size: downloaded },
           total: { amount: total || downloaded }

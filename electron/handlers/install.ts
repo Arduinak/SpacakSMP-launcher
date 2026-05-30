@@ -8,6 +8,8 @@ import logger from 'electron-log/main'
 
 export function getProfilesDir(): string {
   const candidates = [
+    path.join(path.dirname(app.getPath('exe')), 'Profiles'),
+    path.join(process.resourcesPath, '..', 'Profiles'),
     path.join(app.getAppPath(), 'Profiles'),
     path.join(process.cwd(), 'Profiles'),
     path.join(app.getPath('userData'), 'Profiles')

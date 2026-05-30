@@ -4,7 +4,7 @@
   "author": "Arduinak",
   "description": "Spacak Launcher",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "license": "MIT",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -63,7 +63,7 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Spacak Launcher",
       "deleteAppDataOnUninstall": true,
-      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "artifactName": "SpacakLauncher-Setup-${version}.${ext}",
       "uninstallDisplayName": "Spacak Launcher"
     },
     "mac": {
