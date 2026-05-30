@@ -120,6 +120,18 @@ contextBridge.exposeInMainWorld('api', {
     error: (callback: (value: BootstrapsEvents['bootstraps_error'][0]) => void) =>
       ipcRenderer.on('bootstraps:error', (_event, value) => callback(value))
   },
+  modsUpdate: {
+    check: (): Promise<{ updateAvailable: boolean; remoteVersion?: string }> =>
+      ipcRenderer.invoke('mods-update:check'),
+    apply: (remoteVersion: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('mods-update:apply', remoteVersion),
+    progress: (callback: (value: { downloaded: { size: number }; total: { amount: number } }) => void) =>
+      ipcRenderer.on('mods-update:progress', (_event, value) => callback(value)),
+    done: (callback: () => void) =>
+      ipcRenderer.on('mods-update:done', (_event) => callback()),
+    error: (callback: (msg: string) => void) =>
+      ipcRenderer.on('mods-update:error', (_event, msg) => callback(msg))
+  },
   settings: {
     get: (): Promise<IGameSettings> => ipcRenderer.invoke('settings:get'),
     set: (s: IGameSettings): Promise<boolean> => ipcRenderer.invoke('settings:set', s),
